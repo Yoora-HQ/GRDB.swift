@@ -39,7 +39,7 @@ if ProcessInfo.processInfo.environment["SPI_BUILDER"] == "1" {
 }
 
 // GRDB+SQLCipher: Enabled
-dependencies.append(.package(url: "https://github.com/sqlcipher/SQLCipher.swift.git", from: "4.11.0"))
+// SQLCipher xcframework 内嵌在本包中，无需外部依赖
 cSettings.append(.define("SQLITE_HAS_CODEC"))
 swiftSettings.append(.define("SQLITE_HAS_CODEC"))
 swiftSettings.append(.define("SQLCipher"))
@@ -60,16 +60,16 @@ let package = Package(
     ],
     dependencies: dependencies,
     targets: [
-        // GRDB+SQLCipher: GRDBSQLite removed, GRDBSQLCipher enabled
+        // SQLCipher xcframework 内嵌
+        .binaryTarget(name: "SQLCipherFramework", path: "SQLCipher.xcframework"),
         .target(
             name: "GRDBSQLCipher",
-            dependencies: [.product(name: "SQLCipher", package: "SQLCipher.swift")]
+            dependencies: ["SQLCipherFramework"]
         ),
         .target(
             name: "GRDB",
             dependencies: [
-                // GRDB+SQLCipher: Enabled
-                .product(name: "SQLCipher", package: "SQLCipher.swift"),
+                "SQLCipherFramework",
                 .target(name: "GRDBSQLCipher"),
             ],
             path: "GRDB",
